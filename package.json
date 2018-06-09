@@ -1,0 +1,19 @@
+{
+  "name": "seo_defect",
+  "version": "1.0.0",
+  "description": "Provide the functionality to check if given HTML DOM elements match the user-defined rules ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rakasha/seo_defect.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rakasha/seo_defect/issues"
+  },
+  "homepage": "https://github.com/Rakasha/seo_defect#readme"
+}
