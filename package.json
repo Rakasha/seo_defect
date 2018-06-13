@@ -4,7 +4,8 @@
   "description": "Provide the functionality to check if given HTML DOM elements match the user-defined rules ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --silent",
+    "testv": "jest"
   },
   "repository": {
     "type": "git",
