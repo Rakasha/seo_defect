@@ -12,8 +12,20 @@ class Client {
     this.document_dom = null;
   }
 
-  setDocumentSourceByDOM(dom) {
-    this.document_dom = dom;
+  setDocumentSourceByDOM(documentDom) {
+    this.document_dom = documentDom;
+  }
+  
+  setDocumentSourceFromFile(filepath) {
+    JSDOM.fromFile(filepath).then(
+      dom => {this.document_dom = dom.window.document;}
+    );
+  }
+
+  setDocumentSourceFromURL(url) {
+    JSDOM.fromURL(url).then(
+      dom => {this.document_dom = dom.window.document;}
+    );
   }
 
   define_new_rule(rule_name, selector, validator) {
