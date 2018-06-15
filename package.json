@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --silent",
-    "testv": "jest"
+    "testw": "jest --watch"
   },
   "repository": {
     "type": "git",
