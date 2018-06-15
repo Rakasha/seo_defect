@@ -3,7 +3,8 @@ const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
 const utils = require('./utils.js');
-
+const rules = require('./rules.js');
+const validators = require('./validators.js');
 
 class Client {
   constructor() {
@@ -16,10 +17,10 @@ class Client {
   }
 
   define_new_rule(rule_name, selector, validator) {
-    if (utils.DEFINED_RULES.hasOwnProperty(rule_name)) {
+    if (rules.DEFINED_RULES.hasOwnProperty(rule_name)) {
       throw "Duplicate rule name: " + rule_name;
     }
-    utils.DEFINED_RULES[rule_name] = [selector, validator];
+    rules.DEFINED_RULES[rule_name] = [selector, validator];
   }
 
   add_rules(rule_names) {
@@ -35,22 +36,29 @@ class Client {
 
   run() {
     this.check_rules();
-
+    if (this.document_dom == null) {
+      throw "Please set HTML source"
+    }
     let success = [];
     let failed = [];
 
     this.rules_to_apply.forEach(ruleName => {
       console.log("=====  processing rule " + ruleName + "=======");
-      let selectorName = utils.DEFINED_RULES[ruleName][0];
-      let validatorName = utils.DEFINED_RULES[ruleName][1];
-      let selector = utils.DEFINED_SELECTORS[selectorName];
-      let validator = utils.DEFINED_VALIDATORS[validatorName];
+      let [selector, validator] = rules.DEFINED_RULES[ruleName];
+      
+      console.log("...using selector " + selector);
+      
+      var selected = selector(this.document_dom);
+      console.log("selected: ", selected);
 
-      console.log("...using selector " + selectorName);
-      console.log("...using validator " + validatorName);
-      if (validator(selector(this.document_dom)) === true) {
+      console.log("...using validator " + validator);
+      var valid = validator(selected);
+      console.log('validate result =', valid);
+      if (valid === true) {
+        console.log('success')
         success.push(ruleName);
       } else {
+        console.log('failed')
         failed.push(ruleName);
       }
     });
