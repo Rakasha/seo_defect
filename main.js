@@ -30,6 +30,34 @@ class Client {
     );
   }
 
+  // Returns a promise
+  setDocumentSourceFromStream(readableStream) {
+    
+    let setDom = (dom) => this.setDocumentSourceByDOM(dom);
+    let buffer = '';
+
+    let p = new Promise (function (resolve, reject) {
+      let buffer = '';
+      readableStream.on('readable', () => {
+          let data;
+          while (data = readableStream.read()) {
+            buffer += data.toString();
+          }
+      })
+      readableStream.on('end', () => {
+        console.log('Got data from stream:', buffer);
+        let documentDom = (new JSDOM(buffer)).window.document;
+        console.log('documentDom from stream:', documentDom);
+        setDom(documentDom);
+        resolve();
+      });
+      readableStream.on('error', (err) => {
+        reject(err);
+      });
+    });
+    return p;
+  }
+
   define_new_rule(rule_name, selector, validator) {
     if (rules.DEFINED_RULES.hasOwnProperty(rule_name)) {
       throw "Duplicate rule name: " + rule_name;

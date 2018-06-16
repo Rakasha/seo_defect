@@ -1,6 +1,7 @@
 const main = require('./main.js');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
+const Stream = require('stream');
 
 test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
@@ -108,3 +109,16 @@ test('Check return format of client.run()', () => {
 //   console.log(client.document_dom.querySelector('img'));
 //   client.run();
 // });
+
+test('Allow setting HTML source from readable stream', () => {
+  let s = new Stream.Readable()
+  s.push('<div><img></div>');
+  s.push(null);
+  let client = new main.Client();
+  let promise = client.setDocumentSourceFromStream(s);
+  console.log('client.document_dom =', client.document_dom);
+  console.log('returned data:', promise);
+  promise.then(() => {expect(client.document_dom).not.toBeNull();})
+  
+  
+})
