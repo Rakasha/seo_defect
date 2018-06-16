@@ -1,3 +1,5 @@
+const fs = require('fs');
+const { Readable } = require('stream')
 const _ = require('lodash');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
@@ -10,6 +12,7 @@ class Client {
   constructor() {
     this.rules_to_apply = [];
     this.document_dom = null;
+    this.report = null;
   }
 
   setDocumentSourceByDOM(documentDom) {
@@ -81,6 +84,7 @@ class Client {
     if (this.document_dom == null) {
       throw "Please set HTML source"
     }
+    this.report = null;
     let success = [];
     let failed = [];
 
@@ -104,6 +108,11 @@ class Client {
         failed.push(ruleName);
       }
     });
+
+    this.report = new Report();
+    this.report._data['success'] = _.cloneDeep(success);
+    this.report._data['failed'] = _.cloneDeep(failed);
+
     console.log("==============Summary===============");
     console.log("Success: ", success);
     console.log("Failed: ", failed);
@@ -111,8 +120,19 @@ class Client {
   }
 }
 
+class Report {
+  constructor() {
+    this._data = {'success': [], 'failed': []};
+  }
+  detail() {
+    return _.cloneDeep(this._data);
+  }
+  
+}
+
 var exports = module.exports = {};
 exports.Client = Client;
+exports.Report = Report;
 
 // const dom1 = new JSDOM(
 //     `<p>Hello
