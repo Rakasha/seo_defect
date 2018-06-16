@@ -15,15 +15,17 @@ class Client {
   setDocumentSourceByDOM(documentDom) {
     this.document_dom = documentDom;
   }
-  
+
+  // Returns a promise
   setDocumentSourceFromFile(filepath) {
-    JSDOM.fromFile(filepath).then(
+    return JSDOM.fromFile(filepath).then(
       dom => {this.document_dom = dom.window.document;}
     );
   }
 
+  // Returns a promise
   setDocumentSourceFromURL(url) {
-    JSDOM.fromURL(url).then(
+    return JSDOM.fromURL(url).then(
       dom => {this.document_dom = dom.window.document;}
     );
   }
