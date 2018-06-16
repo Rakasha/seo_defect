@@ -1,6 +1,7 @@
 const main = require('./main.js');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
+const Stream = require('stream');
 
 test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
@@ -77,3 +78,47 @@ test('Check return format of client.run()', () => {
   expect(Array.isArray(report[0])).toBe(true);
   expect(Array.isArray(report[1])).toBe(true);
 });
+
+
+// test('Allow setting HTML source from file', () => {
+//   // TODO: find a way to fix the encoding problem
+//   // https://github.com/jsdom/jsdom/issues/2060
+//   let client = new main.Client();
+//   expect(client.document_dom).toBeNull();
+
+//   let filepath = './index.test.html';
+//   client.setDocumentSourceFromFile(filepath);
+//   expect(client.document_dom).not.toBeNull();
+//   console.log(client.document_dom);
+
+//   console.log(client.document_dom.getElementById('myimg'));
+//   client.run();
+// });
+
+// test('Allow setting HTML source from URL', () => {
+//   // TODO: find a way to fix the encoding problem
+//   // https://github.com/jsdom/jsdom/issues/2060
+//   let client = new main.Client();
+//   expect(client.document_dom).toBeNull();
+
+//   let url = 'http://www.google.com';
+//   client.setDocumentSourceFromURL(url);
+//   expect(client.document_dom).not.toBeNull();
+//   console.log(client.document_dom);
+
+//   console.log(client.document_dom.querySelector('img'));
+//   client.run();
+// });
+
+test('Allow setting HTML source from readable stream', () => {
+  let s = new Stream.Readable()
+  s.push('<div><img></div>');
+  s.push(null);
+  let client = new main.Client();
+  let promise = client.setDocumentSourceFromStream(s);
+  console.log('client.document_dom =', client.document_dom);
+  console.log('returned data:', promise);
+  promise.then(() => {expect(client.document_dom).not.toBeNull();})
+  
+  
+})
