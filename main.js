@@ -124,10 +124,39 @@ class Report {
   constructor() {
     this._data = {'success': [], 'failed': []};
   }
+  
   detail() {
     return _.cloneDeep(this._data);
   }
   
+  // Write report data into passed writable stream
+  writeToStream(writable) {
+    console.log('Received writable stream', writable);
+    this.toStream().pipe(writable)
+    return writable;
+  }
+
+  toFile(filepath) {
+    let readable = this.toStream();
+    readable.pipe(fs.createWriteStream(filepath));
+    console.log('Report written to', filepath);
+  }
+
+  // Turns report data into readable stream
+  toStream() {
+    // let readable = new Stream.Readable();
+    let readable = new Readable;
+    this._data['success'].map(
+      ruleName => {readable.push(`[success] ${ruleName}\n`)});
+    this._data['failed'].map(
+      ruleName => {readable.push(`[failed] ${ruleName}\n`)});
+    readable.push(null);
+    return readable;
+  }
+
+  toConsole() {
+    this.toStream().pipe(process.stdout);
+  }
 }
 
 var exports = module.exports = {};

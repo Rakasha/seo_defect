@@ -2,6 +2,7 @@ const main = require('./main.js');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const Stream = require('stream');
+const _ = require('lodash');
 
 test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
@@ -79,6 +80,36 @@ test('Check return format of client.run()', () => {
   expect(Array.isArray(report[1])).toBe(true);
 });
 
+
+
+
+test('Get readable stream from Report', () => {
+  let report = new main.Report();
+  let fakeData = {'success': ['rule1', 'rule2'], 'failed': ['rule3']};
+  report._data = fakeData;
+  let reader = report.toStream();
+  let reportText = '';
+  const expectedText = [
+    '[success] rule1','[success] rule2', '[failed] rule3'
+  ].join('\n') + '\n';
+  reader.on('readable', () => {
+    let data;
+    while (data = reader.read()) {
+      reportText += data.toString();
+    }
+  }).on('end', () => {
+    expect(reportText).toEqual(expectedText);
+  })
+});
+
+test('Check default report data', () => {
+  const defaultData = {
+    success:[],
+    failed: []
+  }
+  let report = new main.Report();
+  expect(report._data).toEqual(defaultData);
+})
 
 // test('Allow setting HTML source from file', () => {
 //   // TODO: find a way to fix the encoding problem
