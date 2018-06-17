@@ -29,7 +29,6 @@ function mergeResults(results) {
     r.msgs.forEach( (x) => msgs.push(x));
   })
   merged.msgs = msgs;
-  console.log('merged=', merged);
   return merged;
 }
 
@@ -138,7 +137,6 @@ class Meta {
   static checkAmount(op, num) {
     let validator = function(doms) {
       let domNum = doms.length;
-      console.log('domNum=', domNum);
       let passed;
       switch (op) {
         case '>':
