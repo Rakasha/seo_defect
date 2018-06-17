@@ -154,8 +154,13 @@ class Report {
     return readable;
   }
 
-  toConsole() {
-    this.toStream().pipe(process.stdout);
+  print() {    
+    this._data['success'].map(
+      ruleName => console.log(`[success] ${ruleName}\n`)
+    );
+    this._data['failed'].map(
+      ruleName => console.error(`[failed] ${ruleName}\n`)
+    );
   }
 }
 
