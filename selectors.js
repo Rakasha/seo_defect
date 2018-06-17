@@ -2,22 +2,36 @@ let DEFINED_SELECTORS = {
 };
 
 
-// High-order functions for building selectors
+/**
+ * High-order functions for building selector functions.
+ * The selector
+ */
 class Meta {
+    /**
+     * Build a querySelector() function with the given string
+     * @param  {String} text - querySelector
+     * @return {Function} - A selector function
+     */
     static querySelector(text) {
-        var selectorFunc = function (dom) {
+        let selectorFunc = function(dom) {
             return dom.querySelector(text);
         };
-        return selectorFunc
+        return selectorFunc;
     }
+    /**
+     * Build a querySelectorAll function with the given string
+     * @param  {String} text - querySelector
+     * @return {Function} - A selector function
+     */
     static querySelectorAll(text) {
-        var selectorFunc = function (dom) {
+        let selectorFunc = function(dom) {
             return dom.querySelectorAll(text);
         };
-        return selectorFunc
+        return selectorFunc;
     }
 }
 
-var exports = module.exports = {};
-exports.Meta = Meta;
-exports.DEFINED_SELECTORS = DEFINED_SELECTORS;
+module.exports = {
+    Meta: Meta,
+    DEFINED_SELECTORS: DEFINED_SELECTORS,
+};

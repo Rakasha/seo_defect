@@ -3,91 +3,94 @@ const path = require('path');
 const tmp = require('tmp');
 const main = require('./main.js');
 const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
+const {JSDOM} = jsdom;
 const Stream = require('stream');
-const _ = require('lodash');
 
-var tmpDirObj;
+let tmpDirObj;
 beforeAll(() => {
   tmpDirObj = tmp.dirSync({unsafeCleanup: true});
   console.log('Dir: ', tmpDirObj.name);
 });
 
-afterAll(() => { 
-  tmpDirObj.removeCallback(); 
+afterAll(() => {
+  tmpDirObj.removeCallback();
   console.log('Removed tmp dir', tmpDirObj);
 });
 
 test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
-  var client = new main.Client();
+  let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  client.rules_to_apply = ["all images have alt value"];
+  client.rules_to_apply = ['all images have alt value'];
   const [success, failed] = client.run();
   expect(success).toEqual([]);
-  expect(failed).toEqual(["all images have alt value"]);
+  expect(failed).toEqual(['all images have alt value']);
 });
 
-test('all <a> must have rel value', () => { 
+test('all <a> must have rel value', () => {
   const dom = new JSDOM(
     `<p>Hello
       <a></a>
       <a rel="bbb"></a>
      </p>`
   );
-  var client = new main.Client();
+  let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  client.rules_to_apply = ["all anchors have rel value"];
-  expect(client.run()).toEqual([[],["all anchors have rel value"]])
+  client.rules_to_apply = ['all anchors have rel value'];
+  expect(client.run()).toEqual([[], ['all anchors have rel value']]);
 });
 
 test('<head> must includes <title>', () => {
   const dom = new JSDOM(`<head><title></title></head>`);
-  var client = new main.Client();
+  let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  client.rules_to_apply = ["<head> have <title>"];
+  client.rules_to_apply = ['<head> have <title>'];
   const [success, failed] = client.run();
-  expect(success).toEqual(["<head> have <title>"])
+  expect(success).toEqual(['<head> have <title>']);
   expect(failed).toEqual([]);
 });
 
-test('Positive: Check number of tags', () => { 
+test('Positive: Check number of tags', () => {
   const dom = new JSDOM(`<body><p><strong>hello</strong></p></body>`);
-  var client = new main.Client();
+  let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  let ruleName = "has less than 2 <strong> tags"
-  client.rules_to_apply = [ruleName]
+  let ruleName = 'has less than 2 <strong> tags';
+  client.rules_to_apply = [ruleName];
   expect(client.run()).toEqual([[ruleName], []]);
 });
 
-test('Negative: Check number of tags', () => { 
+test('Negative: Check number of tags', () => {
   const dom = new JSDOM(
     `<body>
      <p><strong>hello</strong></p>
      <p><strong>hello</strong></p>
      <p><strong>hello</strong></p>
      </body>`);
-  var client = new main.Client();
+  let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  let ruleName = "has less than 2 <strong> tags"
-  client.rules_to_apply = [ruleName]
+  let ruleName = 'has less than 2 <strong> tags';
+  client.rules_to_apply = [ruleName];
   expect(client.run()).toEqual([[], [ruleName]]);
 });
 
 test('Run without HTML source', () => {
-  var client = new main.Client();
-  var runClient = () => { client.run() };
+  let client = new main.Client();
+  let runClient = () => {
+client.run();
+};
   expect(runClient).toThrowError('Please set HTML source');
 });
 
 test('Check return format of client.run()', () => {
   const dom = new JSDOM(`<p></p>`);
-  var client = new main.Client();
+  let client = new main.Client();
   client.setDocumentSourceByDOM(dom);
   let report = client.run();
-  console.log('report=', report)
-  // Structure of returned report should be [[rule1, rule2, ...], [rule3, rule4, ...]]
-  // where first array represents the passed-rules and second is the array of rules which did not pass.
+  console.log('report=', report);
+  // Structure of returned report should be
+  // [[rule1, rule2, ...], [rule3, rule4, ...]]
+  // where first array represents the passed-rules
+  // and second is the array of rules which did not pass.
   expect(Array.isArray(report)).toBe(true);
   expect(report.length).toEqual(2);
   expect(Array.isArray(report[0])).toBe(true);
@@ -96,10 +99,10 @@ test('Check return format of client.run()', () => {
 
 describe('Testing writing into files', () => {
   test('Write the report data into file', () => {
-    const filecontent = 'hi'
+    const filecontent = 'hi';
     const mockedToStream = jest.fn().mockImplementation(
       () => {
-        let s = new Stream.Readable()
+        let s = new Stream.Readable();
         s.push(filecontent);
         s.push(null);
         return s;
@@ -114,9 +117,8 @@ describe('Testing writing into files', () => {
       console.log('content of report.txt:', text);
       expect(text).toEqual(filecontent);
     });
-  });  
+  });
 });
-
 
 
 test('Get readable stream from Report', () => {
@@ -126,7 +128,7 @@ test('Get readable stream from Report', () => {
   let reader = report.toStream();
   let reportText = '';
   const expectedText = [
-    '[success] rule1','[success] rule2', '[failed] rule3'
+    '[success] rule1', '[success] rule2', '[failed] rule3',
   ].join('\n') + '\n';
   reader.on('readable', () => {
     let data;
@@ -135,17 +137,17 @@ test('Get readable stream from Report', () => {
     }
   }).on('end', () => {
     expect(reportText).toEqual(expectedText);
-  })
+  });
 });
 
 test('Check default report data', () => {
   const defaultData = {
-    success:[],
-    failed: []
-  }
+    success: [],
+    failed: [],
+  };
   let report = new main.Report();
   expect(report._data).toEqual(defaultData);
-})
+});
 
 // test('Allow setting HTML source from file', () => {
 //   // TODO: find a way to fix the encoding problem
@@ -178,14 +180,14 @@ test('Check default report data', () => {
 // });
 
 test('Allow setting HTML source from readable stream', () => {
-  let s = new Stream.Readable()
+  let s = new Stream.Readable();
   s.push('<div><img></div>');
   s.push(null);
   let client = new main.Client();
   let promise = client.setDocumentSourceFromStream(s);
   console.log('client.document_dom =', client.document_dom);
   console.log('returned data:', promise);
-  promise.then(() => {expect(client.document_dom).not.toBeNull();})
-  
-  
-})
+  promise.then(() => {
+expect(client.document_dom).not.toBeNull();
+});
+});

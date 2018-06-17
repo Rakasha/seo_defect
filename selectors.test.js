@@ -1,5 +1,5 @@
 const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
+const {JSDOM} = jsdom;
 const selectors = require('./selectors.js');
 
 test('querySelectorAll', () => {
@@ -13,7 +13,7 @@ test('querySelectorAll', () => {
   let doms = selectors.Meta.querySelectorAll('div img')(frag);
   console.log('doms=', doms);
   expect(doms.length).toBe(2);
-  console.log(doms[0].nodeType)
+  console.log(doms[0].nodeType);
   expect(doms[0].id).toEqual('a');
   expect(doms[1].id).toEqual('b');
 });
