@@ -1,3 +1,5 @@
+const fs = require('fs');
+const { Readable } = require('stream')
 const _ = require('lodash');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
@@ -10,6 +12,7 @@ class Client {
   constructor() {
     this.rules_to_apply = [];
     this.document_dom = null;
+    this.report = null;
   }
 
   setDocumentSourceByDOM(documentDom) {
@@ -18,8 +21,10 @@ class Client {
 
   // Returns a promise
   setDocumentSourceFromFile(filepath) {
-    return JSDOM.fromFile(filepath).then(
-      dom => {this.document_dom = dom.window.document;}
+    return JSDOM.fromFile(filepath).then(dom => {
+        this.document_dom = dom.window.document;
+        return this;
+      }
     );
   }
 
@@ -81,6 +86,7 @@ class Client {
     if (this.document_dom == null) {
       throw "Please set HTML source"
     }
+    this.report = null;
     let success = [];
     let failed = [];
 
@@ -104,6 +110,11 @@ class Client {
         failed.push(ruleName);
       }
     });
+
+    this.report = new Report();
+    this.report._data['success'] = _.cloneDeep(success);
+    this.report._data['failed'] = _.cloneDeep(failed);
+
     console.log("==============Summary===============");
     console.log("Success: ", success);
     console.log("Failed: ", failed);
@@ -111,8 +122,59 @@ class Client {
   }
 }
 
+class Report {
+  constructor() {
+    this._data = {'success': [], 'failed': []};
+  }
+  
+  detail() {
+    return _.cloneDeep(this._data);
+  }
+  
+  // Write report data into passed writable stream
+  writeToStream(writable) {
+    console.log('Received writable stream', writable);
+    this.toStream().pipe(writable)
+    return writable;
+  }
+
+  toFile(filepath) {
+    return new Promise((resolve, reject) => {
+      let readable = this.toStream();
+      let writable = fs.createWriteStream(filepath);
+      readable.pipe(writable);  
+      writable.on('finish', () => {
+        console.log('Report written to', filepath);
+        resolve(filepath)
+      }).on('error', reject);
+    });
+  }
+
+  // Turns report data into readable stream
+  toStream() {
+    // let readable = new Stream.Readable();
+    let readable = new Readable;
+    this._data['success'].map(
+      ruleName => {readable.push(`[success] ${ruleName}\n`)});
+    this._data['failed'].map(
+      ruleName => {readable.push(`[failed] ${ruleName}\n`)});
+    readable.push(null);
+    return readable;
+  }
+
+  print() {    
+    this._data['success'].map(
+      ruleName => console.log(`[success] ${ruleName}\n`)
+    );
+    this._data['failed'].map(
+      ruleName => console.error(`[failed] ${ruleName}\n`)
+    );
+  }
+}
+
 var exports = module.exports = {};
 exports.Client = Client;
+exports.Report = Report;
 
 // const dom1 = new JSDOM(
 //     `<p>Hello
