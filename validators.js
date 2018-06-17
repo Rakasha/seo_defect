@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const logger = require('debug')('seo_defect:');
 
 let DEFINED_VALIDATORS = {  
 };
@@ -8,7 +9,7 @@ class Meta {
     var validator = function (doms) {
       var checkDomAttribute = Meta.hasAttributes(attributes);
       var results = _.map(doms, checkDomAttribute);
-      console.log('results:', results)
+      logger('results:', results)
       return _.every(results);
     };
     return validator;
@@ -27,10 +28,10 @@ class Meta {
     var validator = function (dom) {
       var results = attributes.map( function (attr) {
         if(dom.hasAttribute(attr)) {
-          console.log('has attribute:', attr, '=', dom.getAttribute(attr));
+          logger('has attribute:', attr, '=', dom.getAttribute(attr));
           return true;
         } else {
-          console.log('missing attribute:', attr);
+          logger('missing attribute:', attr);
           return false;
         }
       });

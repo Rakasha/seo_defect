@@ -7,6 +7,9 @@ const { JSDOM } = jsdom;
 const utils = require('./utils.js');
 const rules = require('./rules.js');
 const validators = require('./validators.js');
+const appName = 'seo_defect:';
+const logger = require('debug')(appName);
+
 
 class Client {
   constructor() {
@@ -50,9 +53,9 @@ class Client {
           }
       })
       readableStream.on('end', () => {
-        console.log('Got data from stream:', buffer);
+        logger('Got data from stream:', buffer);
         let documentDom = (new JSDOM(buffer)).window.document;
-        console.log('documentDom from stream:', documentDom);
+        logger('documentDom from stream:', documentDom);
         setDom(documentDom);
         resolve();
       });
@@ -91,22 +94,22 @@ class Client {
     let failed = [];
 
     this.rules_to_apply.forEach(ruleName => {
-      console.log("=====  processing rule " + ruleName + "=======");
+      logger("=====  processing rule " + ruleName + "=======");
       let [selector, validator] = rules.DEFINED_RULES[ruleName];
       
-      console.log("...using selector " + selector);
+      logger("...using selector " + selector);
       
       var selected = selector(this.document_dom);
-      console.log("selected: ", selected);
+      logger("selected: ", selected);
 
-      console.log("...using validator " + validator);
+      logger("...using validator " + validator);
       var valid = validator(selected);
-      console.log('validate result =', valid);
+      logger('validate result =', valid);
       if (valid === true) {
-        console.log('success')
+        logger('success')
         success.push(ruleName);
       } else {
-        console.log('failed')
+        logger('failed')
         failed.push(ruleName);
       }
     });
@@ -115,9 +118,9 @@ class Client {
     this.report._data['success'] = _.cloneDeep(success);
     this.report._data['failed'] = _.cloneDeep(failed);
 
-    console.log("==============Summary===============");
-    console.log("Success: ", success);
-    console.log("Failed: ", failed);
+    logger("==============Summary===============");
+    logger("Success: ", success);
+    logger("Failed: ", failed);
     return [success, failed];
   }
 }
@@ -133,7 +136,7 @@ class Report {
   
   // Write report data into passed writable stream
   writeToStream(writable) {
-    console.log('Received writable stream', writable);
+    logger('Received writable stream', writable);
     this.toStream().pipe(writable)
     return writable;
   }
@@ -144,7 +147,7 @@ class Report {
       let writable = fs.createWriteStream(filepath);
       readable.pipe(writable);  
       writable.on('finish', () => {
-        console.log('Report written to', filepath);
+        logger('Report written to', filepath);
         resolve(filepath)
       }).on('error', reject);
     });
@@ -164,10 +167,10 @@ class Report {
 
   print() {    
     this._data['success'].map(
-      ruleName => console.log(`[success] ${ruleName}\n`)
+      ruleName => console.log(`[success] ${ruleName}`)
     );
     this._data['failed'].map(
-      ruleName => console.error(`[failed] ${ruleName}\n`)
+      ruleName => console.error(`[failed] ${ruleName}`)
     );
   }
 }
@@ -198,8 +201,8 @@ exports.Report = Report;
   // const textNode = pEl.firstChild;
   // const imgEl = document.querySelector("img");
 /* 
-  console.log(dom1.nodeLocation(bodyEl));   // null; it's not in the source
-  console.log(dom1.nodeLocation(pEl));      // { startOffset: 0, endOffset: 39, startTag: ..., endTag: ... }
-  console.log(dom1.nodeLocation(textNode)); // { startOffset: 3, endOffset: 13 }
-  console.log(dom1.nodeLocation(imgEl));    // { startOffset: 13, endOffset: 32 }
+  logger(dom1.nodeLocation(bodyEl));   // null; it's not in the source
+  logger(dom1.nodeLocation(pEl));      // { startOffset: 0, endOffset: 39, startTag: ..., endTag: ... }
+  logger(dom1.nodeLocation(textNode)); // { startOffset: 3, endOffset: 13 }
+  logger(dom1.nodeLocation(imgEl));    // { startOffset: 13, endOffset: 32 }
 */

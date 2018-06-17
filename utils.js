@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const logger = require('debug')('seo_defect:');
 
 // ================= High-order Functions ==================
 function hasAttribute(attrName) {
@@ -6,7 +7,7 @@ function hasAttribute(attrName) {
     if (dom[attrName]) {
       return true;
     } else {
-      console.log("dom does not have attr: " + attrName);
+      logger("dom does not have attr: " + attrName);
       return false;
     }
   }
