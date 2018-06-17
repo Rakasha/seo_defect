@@ -125,7 +125,41 @@ class Meta {
     };
     return validator;
   }
-
+  /**
+   * Check if the number of DOMs matches the given equation.
+   * Ther result is determined by `<num of doms> <op> <num>`
+   * @example
+   *   // Creates a function to check if the number of DOMs is greater than 2
+   *   checkAmount('>', 2)
+   * @param  {string} op - comparator (==, >, <)
+   * @param  {number} num - number to compare with
+   * @return {JSON} - result of verification
+   */
+  static checkAmount(op, num) {
+    let validator = function(doms) {
+      let domNum = doms.length;
+      console.log('domNum=', domNum);
+      let passed;
+      switch (op) {
+        case '>':
+          passed = Boolean(domNum > num);
+          break;
+        case '<':
+          passed = Boolean(domNum < num);
+          break;
+        case '==':
+          passed = Boolean(domNum === num);
+          break;
+        default:
+          throw Error(`Un-supported comparator: ${op}`);
+      }
+      let result = _.clone(DEFAULT_RESULTS_OBJ);
+      result.passed = passed;
+      result.msgs.push(`Got ${domNum} element(s)`);
+      return result;
+    };
+    return validator;
+  }
 }
 
 module.exports = {
