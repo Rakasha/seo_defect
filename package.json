@@ -19,7 +19,8 @@
   "homepage": "https://github.com/Rakasha/seo_defect#readme",
   "dependencies": {
     "jsdom": "^11.11.0",
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.10",
+    "tmp": "0.0.33"
   },
   "devDependencies": {
     "jest": "^23.1.0"
