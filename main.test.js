@@ -63,6 +63,7 @@ test('Positive: Check number of tags', () => {
   client.rules_to_apply = [ruleName];
   client.run();
   let result = client.report.detail();
+  console.log('result=', result);
   expect(result['success']).toEqual([ruleName]);
   expect(result['failed']).toEqual([]);
 });
@@ -101,7 +102,7 @@ test('Check format of report', () => {
   // { 'success':[rule1, rule2, ...], 'failed': [rule3, rule4, ...] }
   // where first array represents the passed-rules
   // and second is the array of rules which did not pass.
-  const expectedData = {'success': [], 'failed': []};
+  const expectedData = {'success': [], 'failed': [], 'result': {}};
   expect(report).toEqual(expectedData);
 });
 
@@ -152,6 +153,7 @@ test('Check default report data', () => {
   const defaultData = {
     success: [],
     failed: [],
+    result: {},
   };
   let report = new main.Report();
   expect(report._data).toEqual(defaultData);

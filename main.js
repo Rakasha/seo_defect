@@ -107,33 +107,32 @@ class Client {
       throw new Error('Please set HTML source');
     }
     this.report = null;
-    let success = [];
-    let failed = [];
+    let data = {
+      success: [],
+      failed: [],
+      result: {},
+    };
 
     this.rules_to_apply.forEach((ruleName) => {
       logger('=====  processing rule ' + ruleName + '=======');
       let [selector, validator] = rules.DEFINED_RULES[ruleName];
 
       logger('...using selector ' + selector);
-
       let selected = selector(this.document_dom);
       logger('selected: ', selected);
 
       logger('...using validator ' + validator);
-      let valid = validator(selected);
-      logger('validate result =', valid);
-      if (valid === true) {
-        logger('success');
-        success.push(ruleName);
+      let result = validator(selected);
+      data.result[ruleName] = result;
+      if (result.passed === true) {
+        data.success.push(ruleName);
       } else {
-        logger('failed');
-        failed.push(ruleName);
+        data.failed.push(ruleName);
       }
     });
 
     this.report = new Report();
-    this.report._data['success'] = _.cloneDeep(success);
-    this.report._data['failed'] = _.cloneDeep(failed);
+    this.report._data = data;
   }
 }
 
@@ -146,7 +145,7 @@ class Report {
    * @constructor
    */
   constructor() {
-    this._data = {'success': [], 'failed': []};
+    this._data = {'success': [], 'failed': [], 'result': {}};
   }
 
   /**
@@ -203,13 +202,17 @@ class Report {
    * Print to Console in the following format:
    * "<success/failed> <rule name>" for each rule
    */
-  print() {
-    this._data['success'].map(
-      (ruleName) => console.log(`[success] ${ruleName}`)
-    );
-    this._data['failed'].map(
-      (ruleName) => console.error(`[failed] ${ruleName}`)
-    );
+  print() {    
+    _.forEach(this._data.result, (v, k) => {
+      let stat = 'unknown'
+      if (v.passed) {
+        stat = 'PASSED';
+      } else {
+        stat = 'FAILED'
+      }
+      console.log(`[${stat}] ${k}`)
+      v.msgs.forEach((x) => console.log(' -', x));
+    });
   }
 }
 module.exports = {
