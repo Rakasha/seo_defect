@@ -1,8 +1,38 @@
 const _ = require('lodash');
 const logger = require('debug')('seo_defect:');
 
+/**
+ * The validator functions must:
+ * 1. Accept a DOM Node or a DOM NodeList as function argument
+ * 2. Verify the DOM(s) inside the function body
+ * 3. Returns: a results object
+ */
+const DEFAULT_RESULTS_OBJ = {
+  summary: '',
+  passed: false,
+  msgs: [],
+};
+
 let DEFINED_VALIDATORS = {
 };
+
+/**
+ * Helper function for merging validation results into single one
+ * @param  {Array} results - array of resutls
+ * @return {JSON} - merged result object
+ */
+function mergeResults(results) {
+  let merged = _.cloneDeep(DEFAULT_RESULTS_OBJ);
+  merged.passed = _.chain(results).map((x) => x.passed).every().value();
+  let msgs = [];
+  _.map(results, (r) => {
+    r.msgs.forEach( (x) => msgs.push(x));
+  })
+  merged.msgs = msgs;
+  console.log('merged=', merged);
+  return merged;
+}
+
 /**
  * Class which provides high-order functions for building validator functions
  * @class
@@ -16,16 +46,25 @@ class Meta {
    */
   static hasAttributes(attributes) {
     let validator = function(dom) {
-      let results = attributes.map( function(attr) {
+      let result = _.clone(DEFAULT_RESULTS_OBJ);
+      let missing = [];
+      attributes.map(function(attr) {
         if (dom.hasAttribute(attr)) {
           logger('has attribute:', attr, '=', dom.getAttribute(attr));
-          return true;
         } else {
           logger('missing attribute:', attr);
-          return false;
+          missing.push(attr);
         }
       });
-      return _.every(results);
+      // Prepare the results data
+      if (missing.length > 0) {
+        result.passed = false;
+        let msg = `Missing attributes: ${missing.join(',')}`;
+        result.msgs.push(msg);
+      } else {
+        result.passed = true;
+      }
+      return result;
     };
     return validator;
   }
@@ -37,8 +76,21 @@ class Meta {
    */
   static hasTags(tags) {
     let validator = function(dom) {
-      let results = tags.map((tag) => dom.getElementsByTagName(tag).length > 0);
-      return _.every(results);
+      let result = _.clone(DEFAULT_RESULTS_OBJ);
+      let missing = [];
+      tags.map((tag) => {
+        if (dom.getElementsByTagName(tag).length == 0) {
+          missing.push(tag);
+        }
+      });
+
+      if (missing.length > 0) {
+        result.passed = false;
+        results.msgs.push(`Missing Tags ${missing.join(',')}`);
+      } else {
+        result.passed = true;
+      }
+      return result;
     };
     return validator;
   }
@@ -52,8 +104,10 @@ class Meta {
     let validator = function(doms) {
       let checkDomAttribute = Meta.hasAttributes(attributes);
       let results = _.map(doms, checkDomAttribute);
-      logger('results:', results);
-      return _.every(results);
+      
+      let r = mergeResults(results);
+      logger('merged results:', r);
+      return r
     };
     return validator;
   }
@@ -67,10 +121,11 @@ class Meta {
     let validator = function(doms) {
       let verifyDOM = Meta.hasTags(tags);
       let results = _.map(doms, verifyDOM);
-      return _.every(results);
+      return mergeResults(results);
     };
     return validator;
   }
+
 }
 
 module.exports = {
