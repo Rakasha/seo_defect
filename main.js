@@ -47,9 +47,7 @@ class Client {
    */
   setDocumentSourceFromURL(url) {
     return JSDOM.fromURL(url).then(
-      (dom) => {
-this.document_dom = dom.window.document;
-}
+      (dom) => this.document_dom = dom.window.document
     );
   }
 
@@ -102,7 +100,6 @@ this.document_dom = dom.window.document;
 
   /**
    * Start parsing
-   * @return {Array} [<success rules>, <failed rules>]
    */
   run() {
     this.checkRules();
@@ -137,11 +134,6 @@ this.document_dom = dom.window.document;
     this.report = new Report();
     this.report._data['success'] = _.cloneDeep(success);
     this.report._data['failed'] = _.cloneDeep(failed);
-
-    logger('==============Summary===============');
-    logger('Success: ', success);
-    logger('Failed: ', failed);
-    return [success, failed];
   }
 }
 
@@ -156,6 +148,7 @@ class Report {
   constructor() {
     this._data = {'success': [], 'failed': []};
   }
+
   /**
    * Get raw data of the report
    * @return {JSON} JSON data
@@ -174,6 +167,7 @@ class Report {
     this.toStream().pipe(writable);
     return writable;
   }
+
   /**
    * Writes report into given file location
    * @param  {string} filepath
@@ -190,7 +184,6 @@ class Report {
       }).on('error', reject);
     });
   }
-
 
   /**
    * Turns report data into readable stream

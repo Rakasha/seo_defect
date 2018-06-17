@@ -22,9 +22,10 @@ test('all <img> must have alt value', () => {
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
   client.rules_to_apply = ['all images have alt value'];
-  const [success, failed] = client.run();
-  expect(success).toEqual([]);
-  expect(failed).toEqual(['all images have alt value']);
+  client.run();
+  const result = client.report.detail();
+  expect(result['success']).toEqual([]);
+  expect(result['failed']).toEqual(['all images have alt value']);
 });
 
 test('all <a> must have rel value', () => {
@@ -37,7 +38,10 @@ test('all <a> must have rel value', () => {
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
   client.rules_to_apply = ['all anchors have rel value'];
-  expect(client.run()).toEqual([[], ['all anchors have rel value']]);
+  client.run();
+  const result = client.report.detail();
+  expect(result['success']).toEqual([]);
+  expect(result['failed']).toEqual(['all anchors have rel value']);
 });
 
 test('<head> must includes <title>', () => {
@@ -45,9 +49,10 @@ test('<head> must includes <title>', () => {
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
   client.rules_to_apply = ['<head> have <title>'];
-  const [success, failed] = client.run();
-  expect(success).toEqual(['<head> have <title>']);
-  expect(failed).toEqual([]);
+  client.run();
+  const result = client.report.detail();
+  expect(result['success']).toEqual(['<head> have <title>']);
+  expect(result['failed']).toEqual([]);
 });
 
 test('Positive: Check number of tags', () => {
@@ -56,7 +61,10 @@ test('Positive: Check number of tags', () => {
   client.setDocumentSourceByDOM(dom.window.document);
   let ruleName = 'has less than 2 <strong> tags';
   client.rules_to_apply = [ruleName];
-  expect(client.run()).toEqual([[ruleName], []]);
+  client.run();
+  let result = client.report.detail();
+  expect(result['success']).toEqual([ruleName]);
+  expect(result['failed']).toEqual([]);
 });
 
 test('Negative: Check number of tags', () => {
@@ -70,31 +78,31 @@ test('Negative: Check number of tags', () => {
   client.setDocumentSourceByDOM(dom.window.document);
   let ruleName = 'has less than 2 <strong> tags';
   client.rules_to_apply = [ruleName];
-  expect(client.run()).toEqual([[], [ruleName]]);
+  client.run();
+  const result = client.report.detail();
+  expect(result['success']).toEqual([]);
+  expect(result['failed']).toEqual([ruleName]);
 });
 
 test('Run without HTML source', () => {
   let client = new main.Client();
-  let runClient = () => {
-client.run();
-};
+  let runClient = () => client.run();
   expect(runClient).toThrowError('Please set HTML source');
 });
 
-test('Check return format of client.run()', () => {
+test('Check format of report', () => {
   const dom = new JSDOM(`<p></p>`);
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom);
-  let report = client.run();
+  client.run();
+  let report = client.report.detail();
   console.log('report=', report);
   // Structure of returned report should be
-  // [[rule1, rule2, ...], [rule3, rule4, ...]]
+  // { 'success':[rule1, rule2, ...], 'failed': [rule3, rule4, ...] }
   // where first array represents the passed-rules
   // and second is the array of rules which did not pass.
-  expect(Array.isArray(report)).toBe(true);
-  expect(report.length).toEqual(2);
-  expect(Array.isArray(report[0])).toBe(true);
-  expect(Array.isArray(report[1])).toBe(true);
+  const expectedData = {'success': [], 'failed': []};
+  expect(report).toEqual(expectedData);
 });
 
 describe('Testing writing into files', () => {
@@ -187,7 +195,5 @@ test('Allow setting HTML source from readable stream', () => {
   let promise = client.setDocumentSourceFromStream(s);
   console.log('client.document_dom =', client.document_dom);
   console.log('returned data:', promise);
-  promise.then(() => {
-expect(client.document_dom).not.toBeNull();
-});
+  promise.then(() => expect(client.document_dom).not.toBeNull());
 });
