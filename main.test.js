@@ -1,8 +1,22 @@
+const fs = require('fs');
+const path = require('path');
+const tmp = require('tmp');
 const main = require('./main.js');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const Stream = require('stream');
 const _ = require('lodash');
+
+var tmpDirObj;
+beforeAll(() => {
+  tmpDirObj = tmp.dirSync({unsafeCleanup: true});
+  console.log('Dir: ', tmpDirObj.name);
+});
+
+afterAll(() => { 
+  tmpDirObj.removeCallback(); 
+  console.log('Removed tmp dir', tmpDirObj);
+});
 
 test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
@@ -80,6 +94,28 @@ test('Check return format of client.run()', () => {
   expect(Array.isArray(report[1])).toBe(true);
 });
 
+describe('Testing writing into files', () => {
+  test('Write the report data into file', () => {
+    const filecontent = 'hi'
+    const mockedToStream = jest.fn().mockImplementation(
+      () => {
+        let s = new Stream.Readable()
+        s.push(filecontent);
+        s.push(null);
+        return s;
+      }
+    );
+    let filepath = path.join(tmpDirObj.name, 'report.txt');
+    let report = new main.Report();
+    report.toStream = mockedToStream;
+    let promise = report.toFile(filepath);
+    return promise.then(() => {
+      let text = fs.readFileSync(filepath, 'utf8');
+      console.log('content of report.txt:', text);
+      expect(text).toEqual(filecontent);
+    });
+  });  
+});
 
 
 

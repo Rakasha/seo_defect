@@ -21,8 +21,10 @@ class Client {
 
   // Returns a promise
   setDocumentSourceFromFile(filepath) {
-    return JSDOM.fromFile(filepath).then(
-      dom => {this.document_dom = dom.window.document;}
+    return JSDOM.fromFile(filepath).then(dom => {
+        this.document_dom = dom.window.document;
+        return this;
+      }
     );
   }
 
@@ -137,9 +139,15 @@ class Report {
   }
 
   toFile(filepath) {
-    let readable = this.toStream();
-    readable.pipe(fs.createWriteStream(filepath));
-    console.log('Report written to', filepath);
+    return new Promise((resolve, reject) => {
+      let readable = this.toStream();
+      let writable = fs.createWriteStream(filepath);
+      readable.pipe(writable);  
+      writable.on('finish', () => {
+        console.log('Report written to', filepath);
+        resolve(filepath)
+      }).on('error', reject);
+    });
   }
 
   // Turns report data into readable stream
