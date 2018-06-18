@@ -107,33 +107,32 @@ class Client {
       throw new Error('Please set HTML source');
     }
     this.report = null;
-    let success = [];
-    let failed = [];
+    let data = {
+      success: [],
+      failed: [],
+      result: {},
+    };
 
     this.rules_to_apply.forEach((ruleName) => {
       logger('=====  processing rule ' + ruleName + '=======');
       let [selector, validator] = rules.DEFINED_RULES[ruleName];
 
       logger('...using selector ' + selector);
-
       let selected = selector(this.document_dom);
       logger('selected: ', selected);
 
       logger('...using validator ' + validator);
-      let valid = validator(selected);
-      logger('validate result =', valid);
-      if (valid === true) {
-        logger('success');
-        success.push(ruleName);
+      let result = validator(selected);
+      data.result[ruleName] = result;
+      if (result.passed === true) {
+        data.success.push(ruleName);
       } else {
-        logger('failed');
-        failed.push(ruleName);
+        data.failed.push(ruleName);
       }
     });
 
     this.report = new Report();
-    this.report._data['success'] = _.cloneDeep(success);
-    this.report._data['failed'] = _.cloneDeep(failed);
+    this.report._data = data;
   }
 }
 
@@ -146,7 +145,7 @@ class Report {
    * @constructor
    */
   constructor() {
-    this._data = {'success': [], 'failed': []};
+    this._data = {'success': [], 'failed': [], 'result': {}};
   }
 
   /**
@@ -179,7 +178,7 @@ class Report {
       let writable = fs.createWriteStream(filepath);
       readable.pipe(writable);
       writable.on('finish', () => {
-        logger('Report written to', filepath);
+        console.log('Report written to', filepath);
         resolve(filepath);
       }).on('error', reject);
     });
@@ -191,25 +190,41 @@ class Report {
    */
   toStream() {
     let readable = new Readable;
-    this._data['success'].map(
-      (ruleName) => readable.push(`[success] ${ruleName}\n`));
-    this._data['failed'].map(
-      (ruleName) => readable.push(`[failed] ${ruleName}\n`));
+    this.toStrings().forEach((x) => readable.push(x + '\n'));
     readable.push(null);
     return readable;
   }
 
   /**
-   * Print to Console in the following format:
-   * "<success/failed> <rule name>" for each rule
+   * Print to Console:
+   * Example output:
+   * "[<PASSED/FAILED>] <rule name>" for each rule
    */
   print() {
-    this._data['success'].map(
-      (ruleName) => console.log(`[success] ${ruleName}`)
-    );
-    this._data['failed'].map(
-      (ruleName) => console.error(`[failed] ${ruleName}`)
-    );
+    this.toStrings().forEach((s) => console.log(s));
+  }
+
+  /**
+   * Turns report data into array of strings
+   * @return {Array} - Array of strings
+   */
+  toStrings() {
+    let data = [];
+    _.forEach(this._data.result, (result, ruleName) => {
+      logger('result:', result);
+      let stat = 'unknown';
+      if (result.passed === true) {
+        stat = 'PASSED';
+      } else {
+        stat = 'FAILED';
+      }
+
+      data.push(`[${stat}] ${ruleName}`);
+      result.msgs.forEach((msg) => {
+        data.push(` - ${msg}`);
+      });
+    });
+    return data;
   }
 }
 module.exports = {

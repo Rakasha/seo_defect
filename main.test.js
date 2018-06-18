@@ -63,6 +63,7 @@ test('Positive: Check number of tags', () => {
   client.rules_to_apply = [ruleName];
   client.run();
   let result = client.report.detail();
+  console.log('result=', result);
   expect(result['success']).toEqual([ruleName]);
   expect(result['failed']).toEqual([]);
 });
@@ -101,7 +102,7 @@ test('Check format of report', () => {
   // { 'success':[rule1, rule2, ...], 'failed': [rule3, rule4, ...] }
   // where first array represents the passed-rules
   // and second is the array of rules which did not pass.
-  const expectedData = {'success': [], 'failed': []};
+  const expectedData = {'success': [], 'failed': [], 'result': {}};
   expect(report).toEqual(expectedData);
 });
 
@@ -131,12 +132,24 @@ describe('Testing writing into files', () => {
 
 test('Get readable stream from Report', () => {
   let report = new main.Report();
-  let fakeData = {'success': ['rule1', 'rule2'], 'failed': ['rule3']};
-  report._data = fakeData;
+  const reportData = {
+    success: [],
+    failed: [],
+    result: {
+      'rule A': {passed: true, msgs: ['msg1', 'msg2']},
+      'rule B': {passed: false, msgs: ['msg3', 'msg4']},
+    },
+  };
+  report._data = reportData;
   let reader = report.toStream();
   let reportText = '';
   const expectedText = [
-    '[success] rule1', '[success] rule2', '[failed] rule3',
+    '[PASSED] rule A',
+    ' - msg1',
+    ' - msg2',
+    '[FAILED] rule B',
+    ' - msg3',
+    ' - msg4',
   ].join('\n') + '\n';
   reader.on('readable', () => {
     let data;
@@ -152,9 +165,32 @@ test('Check default report data', () => {
   const defaultData = {
     success: [],
     failed: [],
+    result: {},
   };
   let report = new main.Report();
   expect(report._data).toEqual(defaultData);
+});
+
+test('Test Report.toStrings()', () => {
+  const reportData = {
+    success: [],
+    failed: [],
+    result: {
+      'rule A': {passed: true, msgs: ['msg1', 'msg2']},
+      'rule B': {passed: false, msgs: ['msg3', 'msg4']},
+    },
+  };
+  let report = new main.Report();
+  report._data = reportData;
+  const expectedData = [
+    '[PASSED] rule A',
+    ' - msg1',
+    ' - msg2',
+    '[FAILED] rule B',
+    ' - msg3',
+    ' - msg4',
+  ];
+  expect(report.toStrings()).toEqual(expectedData);
 });
 
 // test('Allow setting HTML source from file', () => {
