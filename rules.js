@@ -11,6 +11,8 @@ let DEFINED_RULES = {
                           validators.Meta.hasTags(['title'])],
   'has less than 2 <strong> tags': [selectors.Meta.querySelectorAll('strong'),
                                     validators.Meta.checkAmount('<', 2)],
+  'must have input box': [selectors.Meta.querySelector('input'),
+                          validators.Def.mustExist],
 };
 
 module.exports = {
