@@ -178,7 +178,7 @@ class Report {
       let writable = fs.createWriteStream(filepath);
       readable.pipe(writable);
       writable.on('finish', () => {
-        logger('Report written to', filepath);
+        console.log('Report written to', filepath);
         resolve(filepath);
       }).on('error', reject);
     });
@@ -190,29 +190,41 @@ class Report {
    */
   toStream() {
     let readable = new Readable;
-    this._data['success'].map(
-      (ruleName) => readable.push(`[success] ${ruleName}\n`));
-    this._data['failed'].map(
-      (ruleName) => readable.push(`[failed] ${ruleName}\n`));
+    this.toStrings().forEach((x) => readable.push(x + '\n'));
     readable.push(null);
     return readable;
   }
 
   /**
-   * Print to Console in the following format:
-   * "<success/failed> <rule name>" for each rule
+   * Print to Console:
+   * Example output:
+   * "[<PASSED/FAILED>] <rule name>" for each rule
    */
-  print() {    
-    _.forEach(this._data.result, (v, k) => {
-      let stat = 'unknown'
-      if (v.passed) {
+  print() {
+    this.toStrings().forEach((s) => console.log(s));
+  }
+
+  /**
+   * Turns report data into array of strings
+   * @return {Array} - Array of strings
+   */
+  toStrings() {
+    let data = [];
+    _.forEach(this._data.result, (result, ruleName) => {
+      logger('result:', result);
+      let stat = 'unknown';
+      if (result.passed === true) {
         stat = 'PASSED';
       } else {
-        stat = 'FAILED'
+        stat = 'FAILED';
       }
-      console.log(`[${stat}] ${k}`)
-      v.msgs.forEach((x) => console.log(' -', x));
+
+      data.push(`[${stat}] ${ruleName}`);
+      result.msgs.forEach((msg) => {
+        data.push(` - ${msg}`);
+      });
     });
+    return data;
   }
 }
 module.exports = {
