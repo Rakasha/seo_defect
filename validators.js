@@ -1,13 +1,19 @@
 const _ = require('lodash');
 const logger = require('debug')('seo_defect:');
 
-
-const DEFAULT_RESULTS_OBJ = {
-  summary: '',
-  passed: false,
-  msgs: [],
-};
-
+/**
+ * Use this to obtain the blank result object which
+ * will then be returned by the validator functions
+ * @return {JSON}
+ */
+function initResultObj() {
+  const defaultResultObj = {
+    summary: '',
+    passed: false,
+    msgs: [],
+  };
+  return defaultResultObj;
+}
 
  /**
   * Provide pre-defined validator functions
@@ -15,7 +21,7 @@ const DEFAULT_RESULTS_OBJ = {
   * 1. Accept a DOM Node or a DOM NodeList as function argument
   * 2. Verify the DOM(s) inside the function body
   * 3. Returns: a results object
-  *             (uses the format defined in DEFAULT_RESULTS_OBJ )
+  *             (uses the format defined in initResultObj() )
   */
 class Def {
   /**
@@ -24,17 +30,17 @@ class Def {
    * @return {JSON} - the result of validation
    */
   static mustExist(obj) {
-    let r = _.cloneDeep(DEFAULT_RESULTS_OBJ);
+    let r = initResultObj();
 
     if (obj === null) {
       r.passed = false;
-      r.msgs.push('Got nothing: ${obj}');
+      r.msgs.push('Element(s) not found. Got: ${obj}');
     } else if (obj.constructor.name === 'NodeList' && obj.length === 0) {
       r.passed = false;
-      r.msgs.push('Got empty NodeList: ${obj}');
+      r.msgs.push('Element(s) not found. Got empty NodeList: ${obj}');
     } else {
       r.passed = true;
-      r.msgs.push('Got obj: ${obj}');
+      r.msgs.push(`Got obj: ${obj}`);
     }
     return r;
   }
@@ -46,7 +52,7 @@ class Def {
  * @return {JSON} - merged result object
  */
 function mergeResults(results) {
-  let merged = _.cloneDeep(DEFAULT_RESULTS_OBJ);
+  let merged = initResultObj();
   merged.passed = _.chain(results).map((x) => x.passed).every().value();
   let msgs = [];
   _.map(results, (r) => {
@@ -69,7 +75,7 @@ class Meta {
    */
   static hasAttributes(attributes) {
     let validator = function(dom) {
-      let result = _.clone(DEFAULT_RESULTS_OBJ);
+      let result = initResultObj();
       let missing = [];
       attributes.map(function(attr) {
         if (dom.hasAttribute(attr)) {
@@ -99,7 +105,7 @@ class Meta {
    */
   static hasTags(tags) {
     let validator = function(dom) {
-      let result = _.clone(DEFAULT_RESULTS_OBJ);
+      let result = initResultObj();
       let missing = [];
       tags.map((tag) => {
         if (dom.getElementsByTagName(tag).length == 0) {
@@ -160,7 +166,7 @@ class Meta {
   static checkAmount(op, num) {
     let validator = function(doms) {
       let domNum = doms.length;
-      let result = _.clone(DEFAULT_RESULTS_OBJ);
+      let result = initResultObj();
       switch (op) {
         case '>':
           result.passed = Boolean(domNum > num);
