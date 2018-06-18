@@ -1,10 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const Stream = require('stream');
+
 const tmp = require('tmp');
-const main = require('../lib/main.js');
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
-const Stream = require('stream');
+
+const main = require('../lib/main.js');
+const rules = require('../lib/rules.js');
 
 let tmpDirObj;
 beforeAll(() => {
@@ -21,11 +24,13 @@ test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  client.rules_to_apply = ['all images have alt value'];
+  let rule = rules.PREDEFINED[0];
+  let ruleName = rule[0];
+  client.rules_to_apply = [rule];
   client.run();
   const result = client.report.detail();
   expect(result['success']).toEqual([]);
-  expect(result['failed']).toEqual(['all images have alt value']);
+  expect(result['failed']).toEqual([ruleName]);
 });
 
 test('all <a> must have rel value', () => {
@@ -37,30 +42,49 @@ test('all <a> must have rel value', () => {
   );
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  client.rules_to_apply = ['all anchors have rel value'];
+  // let rule = rules.Meta.checkElementAttributes('a', ['rel']);
+  let rule = rules.PREDEFINED[1];
+  let ruleName = rule[0];
+  client.rules_to_apply = [rule];
   client.run();
   const result = client.report.detail();
   expect(result['success']).toEqual([]);
-  expect(result['failed']).toEqual(['all anchors have rel value']);
+  expect(result['failed']).toEqual([ruleName]);
 });
 
-test('<head> must includes <title>', () => {
+test('Positive: <head> must includes <title>', () => {
   const dom = new JSDOM(`<head><title></title></head>`);
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  client.rules_to_apply = ['<head> have <title>'];
+  let rule = rules.Meta.checkNumberOfSelected('head title', '>', 0);
+  let ruleName = rule[0];
+  client.rules_to_apply = [rule];
   client.run();
   const result = client.report.detail();
-  expect(result['success']).toEqual(['<head> have <title>']);
+  expect(result['success']).toEqual([ruleName]);
   expect(result['failed']).toEqual([]);
+});
+
+test('Negative: <head> must includes <title>', () => {
+  const dom = new JSDOM(`<head></head>`);
+  let client = new main.Client();
+  client.setDocumentSourceByDOM(dom.window.document);
+  let rule = rules.Meta.checkNumberOfSelected('head title', '>', 0);
+  let ruleName = rule[0];
+  client.rules_to_apply = [rule];
+  client.run();
+  const result = client.report.detail();
+  expect(result['success']).toEqual([]);
+  expect(result['failed']).toEqual([ruleName]);
 });
 
 test('Positive: Check number of tags', () => {
   const dom = new JSDOM(`<body><p><strong>hello</strong></p></body>`);
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  let ruleName = 'has less than 2 <strong> tags';
-  client.rules_to_apply = [ruleName];
+  let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2)
+  let ruleName = rule[0];
+  client.rules_to_apply = [rule];
   client.run();
   let result = client.report.detail();
   console.log('result=', result);
@@ -77,8 +101,9 @@ test('Negative: Check number of tags', () => {
      </body>`);
   let client = new main.Client();
   client.setDocumentSourceByDOM(dom.window.document);
-  let ruleName = 'has less than 2 <strong> tags';
-  client.rules_to_apply = [ruleName];
+  let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2)
+  let ruleName = rule[0];
+  client.rules_to_apply = [rule];
   client.run();
   const result = client.report.detail();
   expect(result['success']).toEqual([]);
