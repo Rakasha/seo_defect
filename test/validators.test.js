@@ -1,6 +1,6 @@
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
-const validators = require('./validators.js');
+const validators = require('../lib/validators.js');
 
 test('Positive: allHaveAttributes', () => {
   let frag = JSDOM.fragment(
