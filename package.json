@@ -23,6 +23,7 @@
   "homepage": "https://github.com/Rakasha/seo_defect#readme",
   "dependencies": {
     "debug": "^3.1.0",
+    "is-url": "^1.2.4",
     "jsdom": "^11.11.0",
     "lodash": "^4.17.10"
   },
