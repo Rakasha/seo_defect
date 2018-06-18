@@ -1,4 +1,7 @@
-dom-defect
+[![Build Status](https://travis-ci.org/Rakasha/seo_defect.svg?branch=master)](https://travis-ci.org/Rakasha/seo_defect)
+[![Coverage Status](https://coveralls.io/repos/github/Rakasha/seo_defect/badge.svg?branch=master)](https://coveralls.io/github/Rakasha/seo_defect?branch=master)
+
+dom-defect 
 =================
 Detect defections from HTML DOM-Elements
 
