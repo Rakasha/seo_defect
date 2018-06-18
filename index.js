@@ -5,7 +5,7 @@ const validators = require('./lib/validators.js');
 const selectors = require('./lib/selectors.js');
 
 module.exports = {
-    Client: main.Client,
+    Detector: main.Detector,
     Report: main.Report,
     rules: rules,
     validators: validators,

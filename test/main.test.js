@@ -22,13 +22,13 @@ afterAll(() => {
 
 test('all <img> must have alt value', () => {
   const dom = new JSDOM(`<img src="">`);
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom.window.document);
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom.window.document);
   let rule = rules.PREDEFINED[0];
   let ruleName = rule[0];
-  client.rules_to_apply = [rule];
-  client.run();
-  const result = client.report.detail();
+  detector.rules_to_apply = [rule];
+  detector.run();
+  const result = detector.report.detail();
   expect(result['success']).toEqual([]);
   expect(result['failed']).toEqual([ruleName]);
 });
@@ -40,53 +40,53 @@ test('all <a> must have rel value', () => {
       <a rel="bbb"></a>
      </p>`
   );
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom.window.document);
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom.window.document);
   // let rule = rules.Meta.checkElementAttributes('a', ['rel']);
   let rule = rules.PREDEFINED[1];
   let ruleName = rule[0];
-  client.rules_to_apply = [rule];
-  client.run();
-  const result = client.report.detail();
+  detector.rules_to_apply = [rule];
+  detector.run();
+  const result = detector.report.detail();
   expect(result['success']).toEqual([]);
   expect(result['failed']).toEqual([ruleName]);
 });
 
 test('Positive: <head> must includes <title>', () => {
   const dom = new JSDOM(`<head><title></title></head>`);
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom.window.document);
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom.window.document);
   let rule = rules.Meta.checkNumberOfSelected('head title', '>', 0);
   let ruleName = rule[0];
-  client.rules_to_apply = [rule];
-  client.run();
-  const result = client.report.detail();
+  detector.rules_to_apply = [rule];
+  detector.run();
+  const result = detector.report.detail();
   expect(result['success']).toEqual([ruleName]);
   expect(result['failed']).toEqual([]);
 });
 
 test('Negative: <head> must includes <title>', () => {
   const dom = new JSDOM(`<head></head>`);
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom.window.document);
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom.window.document);
   let rule = rules.Meta.checkNumberOfSelected('head title', '>', 0);
   let ruleName = rule[0];
-  client.rules_to_apply = [rule];
-  client.run();
-  const result = client.report.detail();
+  detector.rules_to_apply = [rule];
+  detector.run();
+  const result = detector.report.detail();
   expect(result['success']).toEqual([]);
   expect(result['failed']).toEqual([ruleName]);
 });
 
 test('Positive: Check number of tags', () => {
   const dom = new JSDOM(`<body><p><strong>hello</strong></p></body>`);
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom.window.document);
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom.window.document);
   let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2)
   let ruleName = rule[0];
-  client.rules_to_apply = [rule];
-  client.run();
-  let result = client.report.detail();
+  detector.rules_to_apply = [rule];
+  detector.run();
+  let result = detector.report.detail();
   console.log('result=', result);
   expect(result['success']).toEqual([ruleName]);
   expect(result['failed']).toEqual([]);
@@ -99,29 +99,29 @@ test('Negative: Check number of tags', () => {
      <p><strong>hello</strong></p>
      <p><strong>hello</strong></p>
      </body>`);
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom.window.document);
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom.window.document);
   let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2)
   let ruleName = rule[0];
-  client.rules_to_apply = [rule];
-  client.run();
-  const result = client.report.detail();
+  detector.rules_to_apply = [rule];
+  detector.run();
+  const result = detector.report.detail();
   expect(result['success']).toEqual([]);
   expect(result['failed']).toEqual([ruleName]);
 });
 
 test('Run without HTML source', () => {
-  let client = new main.Client();
-  let runClient = () => client.run();
-  expect(runClient).toThrowError('Please set HTML source');
+  let detector = new main.Detector();
+  let rundetector = () => detector.run();
+  expect(rundetector).toThrowError('Please set HTML source');
 });
 
 test('Check format of report', () => {
   const dom = new JSDOM(`<p></p>`);
-  let client = new main.Client();
-  client.setDocumentSourceByDOM(dom);
-  client.run();
-  let report = client.report.detail();
+  let detector = new main.Detector();
+  detector.setDocumentSourceByDOM(dom);
+  detector.run();
+  let report = detector.report.detail();
   console.log('report=', report);
   // Structure of returned report should be
   // { 'success':[rule1, rule2, ...], 'failed': [rule3, rule4, ...] }
@@ -221,40 +221,40 @@ test('Test Report.toStrings()', () => {
 // test('Allow setting HTML source from file', () => {
 //   // TODO: find a way to fix the encoding problem
 //   // https://github.com/jsdom/jsdom/issues/2060
-//   let client = new main.Client();
-//   expect(client.document_dom).toBeNull();
+//   let detector = new main.Detector();
+//   expect(detector.document_dom).toBeNull();
 
 //   let filepath = './index.test.html';
-//   client.setDocumentSourceFromFile(filepath);
-//   expect(client.document_dom).not.toBeNull();
-//   console.log(client.document_dom);
+//   detector.setDocumentSourceFromFile(filepath);
+//   expect(detector.document_dom).not.toBeNull();
+//   console.log(detector.document_dom);
 
-//   console.log(client.document_dom.getElementById('myimg'));
-//   client.run();
+//   console.log(detector.document_dom.getElementById('myimg'));
+//   detector.run();
 // });
 
 // test('Allow setting HTML source from URL', () => {
 //   // TODO: find a way to fix the encoding problem
 //   // https://github.com/jsdom/jsdom/issues/2060
-//   let client = new main.Client();
-//   expect(client.document_dom).toBeNull();
+//   let detector = new main.Detector();
+//   expect(detector.document_dom).toBeNull();
 
 //   let url = 'http://www.google.com';
-//   client.setDocumentSourceFromURL(url);
-//   expect(client.document_dom).not.toBeNull();
-//   console.log(client.document_dom);
+//   detector.setDocumentSourceFromURL(url);
+//   expect(detector.document_dom).not.toBeNull();
+//   console.log(detector.document_dom);
 
-//   console.log(client.document_dom.querySelector('img'));
-//   client.run();
+//   console.log(detector.document_dom.querySelector('img'));
+//   detector.run();
 // });
 
 test('Allow setting HTML source from readable stream', () => {
   let s = new Stream.Readable();
   s.push('<div><img></div>');
   s.push(null);
-  let client = new main.Client();
-  let promise = client.setDocumentSourceFromStream(s);
-  console.log('client.document_dom =', client.document_dom);
+  let detector = new main.Detector();
+  let promise = detector.setDocumentSourceFromStream(s);
+  console.log('detector.document_dom =', detector.document_dom);
   console.log('returned data:', promise);
-  promise.then(() => expect(client.document_dom).not.toBeNull());
+  promise.then(() => expect(detector.document_dom).not.toBeNull());
 });
