@@ -1,6 +1,6 @@
 const jsdom = require('jsdom');
 const {JSDOM} = jsdom;
-const selectors = require('./selectors.js');
+const selectors = require('../lib/selectors.js');
 
 test('querySelectorAll', () => {
   let frag = JSDOM.fragment(
