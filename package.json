@@ -1,6 +1,6 @@
 {
   "name": "domdefect",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Provide the functionalities to check if given HTML DOM elements match the user-defined rules",
   "main": "index.js",
   "directories": {
