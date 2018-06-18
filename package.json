@@ -1,8 +1,12 @@
 {
-  "name": "seo_defect",
+  "name": "domdefect",
   "version": "0.0.0",
-  "description": "Provide the functionality to check if given HTML DOM elements match the user-defined rules ",
+  "description": "Provide the functionalities to check if given HTML DOM elements match the user-defined rules",
   "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
   "scripts": {
     "test": "jest --silent",
     "testw": "DEBUG=seo_defect* jest --watch"
@@ -12,7 +16,7 @@
     "url": "git+https://github.com/Rakasha/seo_defect.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Rakasha/seo_defect/issues"
   },
@@ -20,12 +24,12 @@
   "dependencies": {
     "debug": "^3.1.0",
     "jsdom": "^11.11.0",
-    "lodash": "^4.17.10",
-    "tmp": "0.0.33"
+    "lodash": "^4.17.10"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
-    "jest": "^23.1.0"
+    "jest": "^23.1.0",
+    "tmp": "0.0.33"
   }
 }
