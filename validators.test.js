@@ -47,3 +47,30 @@ describe('Check amount of DOM', () => {
     expect(f).toThrowError(/Un-supported comparator:/);
   });
 });
+
+describe('Test Def.mustExist()', () => {
+  test('Positive: mustExist()', () => {
+    let frag = JSDOM.fragment(`<img>`);
+    let dom = frag.querySelector('img');
+    console.log('dom', dom);
+    let result = validators.Def.mustExist(dom);
+    console.log(result);
+    expect(result.passed).toEqual(true);
+  });
+
+  test('Negative: mustExist() with null obj', () => {
+    let frag = JSDOM.fragment(`<img>`);
+    let dom = frag.querySelector('input');
+    console.log(dom);
+    let result = validators.Def.mustExist(dom);
+    expect(result.passed).toBe(false);
+  });
+
+  test('Negative: mustExist() with empty NodeList', () => {
+    let frag = JSDOM.fragment(`<img>`);
+    let dom = frag.querySelectorAll('input');
+    console.log(dom);
+    let result = validators.Def.mustExist(dom);
+    expect(result.passed).toBe(false);
+  });
+});

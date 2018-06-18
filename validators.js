@@ -1,20 +1,44 @@
 const _ = require('lodash');
 const logger = require('debug')('seo_defect:');
 
-/**
- * The validator functions must:
- * 1. Accept a DOM Node or a DOM NodeList as function argument
- * 2. Verify the DOM(s) inside the function body
- * 3. Returns: a results object
- */
+
 const DEFAULT_RESULTS_OBJ = {
   summary: '',
   passed: false,
   msgs: [],
 };
 
-let DEFINED_VALIDATORS = {
-};
+
+ /**
+  * Provide pre-defined validator functions
+  * The validator functions must:
+  * 1. Accept a DOM Node or a DOM NodeList as function argument
+  * 2. Verify the DOM(s) inside the function body
+  * 3. Returns: a results object
+  *             (uses the format defined in DEFAULT_RESULTS_OBJ )
+  */
+class Def {
+  /**
+   * Check if the selector function had returned any data
+   * @param  {obj} obj - object returned from the selector function
+   * @return {JSON} - the result of validation
+   */
+  static mustExist(obj) {
+    let r = _.cloneDeep(DEFAULT_RESULTS_OBJ);
+
+    if (obj === null) {
+      r.passed = false;
+      r.msgs.push('Got nothing: ${obj}');
+    } else if (obj.constructor.name === 'NodeList' && obj.length === 0) {
+      r.passed = false;
+      r.msgs.push('Got empty NodeList: ${obj}');
+    } else {
+      r.passed = true;
+      r.msgs.push('Got obj: ${obj}');
+    }
+    return r;
+  }
+}
 
 /**
  * Helper function for merging validation results into single one
@@ -27,7 +51,7 @@ function mergeResults(results) {
   let msgs = [];
   _.map(results, (r) => {
     r.msgs.forEach( (x) => msgs.push(x));
-  })
+  });
   merged.msgs = msgs;
   return merged;
 }
@@ -85,7 +109,7 @@ class Meta {
 
       if (missing.length > 0) {
         result.passed = false;
-        results.msgs.push(`Missing Tags ${missing.join(',')}`);
+        results.msgs.push(`Missing Tags: ${missing.join(',')}`);
       } else {
         result.passed = true;
       }
@@ -103,10 +127,9 @@ class Meta {
     let validator = function(doms) {
       let checkDomAttribute = Meta.hasAttributes(attributes);
       let results = _.map(doms, checkDomAttribute);
-      
       let r = mergeResults(results);
       logger('merged results:', r);
-      return r
+      return r;
     };
     return validator;
   }
@@ -137,23 +160,22 @@ class Meta {
   static checkAmount(op, num) {
     let validator = function(doms) {
       let domNum = doms.length;
-      let passed;
+      let result = _.clone(DEFAULT_RESULTS_OBJ);
       switch (op) {
         case '>':
-          passed = Boolean(domNum > num);
+          result.passed = Boolean(domNum > num);
           break;
         case '<':
-          passed = Boolean(domNum < num);
+          result.passed = Boolean(domNum < num);
           break;
         case '==':
-          passed = Boolean(domNum === num);
+          result.passed = Boolean(domNum === num);
           break;
         default:
           throw Error(`Un-supported comparator: ${op}`);
       }
-      let result = _.clone(DEFAULT_RESULTS_OBJ);
-      result.passed = passed;
       result.msgs.push(`Got ${domNum} element(s)`);
+      result.msgs.push(`Compare: domNum ${op} ${num} ? ${result.passed}`);
       return result;
     };
     return validator;
@@ -162,5 +184,5 @@ class Meta {
 
 module.exports = {
   Meta: Meta,
-  DEFINED_VALIDATORS: DEFINED_VALIDATORS,
+  Def: Def,
 };
