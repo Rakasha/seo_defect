@@ -21,8 +21,7 @@ Set the rules for the detector
 ```javascript
 // Using pre-defined rule
 const {rules} = domdefect;
-detector.rules_to_apply = [rules.PREDEFINED[0],
-						   rules.PREDEFINED[1]]
+detector.rules_to_apply = [rules.PREDEFINED[0], rules.PREDEFINED[1]]
 // Or customize your rule from Meta rules
 let myRule = rules.Meta.checkNumberOfSelected('strong', '<', 2);
 let myRule2 = rules.Meta.checkElementAttributes('input', ['value', 'id', 'yo']);
