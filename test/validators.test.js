@@ -24,6 +24,31 @@ test('Negative: allHaveAttributes', () => {
   expect(result.passed).toBe(false);
 });
 
+test('Positive: check attribute value', () => {
+  let frag = JSDOM.fragment(`<input name='aaa'>`);
+  let nodeList = frag.querySelector('input');
+  result = validators.Meta.hasAttributeValue('name', 'aaa')(nodeList);
+  console.log(result);
+  expect(result.passed).toBe(true);
+});
+
+test('Negative: check attribute value', () => {
+  let frag = JSDOM.fragment(`<input name='aaa'>`);
+  let nodeList = frag.querySelector('input');
+  result = validators.Meta.hasAttributeValue('name', 'BBBB')(nodeList);
+  console.log(result);
+  expect(result.passed).toBe(false);
+});
+
+test('Negative: check attribute value on missing attributes', () => {
+  let frag = JSDOM.fragment(`<input>`);
+  let nodeList = frag.querySelector('input');
+  result = validators.Meta.hasAttributeValue('name', 'BBBB')(nodeList);
+  console.log(result);
+  expect(result.passed).toBe(false);
+});
+
+
 describe('Check amount of DOM', () => {
   test('Use operator > ', () => {
     let frag = JSDOM.fragment(`<img><img><img>`);
