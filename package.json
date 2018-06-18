@@ -4,7 +4,7 @@
   "description": "Provide the functionality to check if given HTML DOM elements match the user-defined rules ",
   "main": "index.js",
   "scripts": {
-    "test": "DEBUG=seo_defect* jest --silent",
+    "test": "jest --silent",
     "testw": "DEBUG=seo_defect* jest --watch"
   },
   "repository": {
