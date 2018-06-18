@@ -82,7 +82,7 @@ test('Positive: Check number of tags', () => {
   const dom = new JSDOM(`<body><p><strong>hello</strong></p></body>`);
   let detector = new main.Detector();
   detector.setDocumentSourceByDOM(dom.window.document);
-  let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2)
+  let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2);
   let ruleName = rule[0];
   detector.rules_to_apply = [rule];
   detector.run();
@@ -101,7 +101,7 @@ test('Negative: Check number of tags', () => {
      </body>`);
   let detector = new main.Detector();
   detector.setDocumentSourceByDOM(dom.window.document);
-  let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2)
+  let rule = rules.Meta.checkNumberOfSelected('strong', '<', 2);
   let ruleName = rule[0];
   detector.rules_to_apply = [rule];
   detector.run();
