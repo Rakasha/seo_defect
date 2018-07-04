@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/Rakasha/seo_defect.svg?branch=master)](https://travis-ci.org/Rakasha/seo_defect)
 [![Coverage Status](https://coveralls.io/repos/github/Rakasha/seo_defect/badge.svg?branch=master)](https://coveralls.io/github/Rakasha/seo_defect?branch=master)
+[![npm version](https://badge.fury.io/js/domdefect.svg)](https://badge.fury.io/js/domdefect)
 
 dom-defect 
 =================
@@ -60,7 +61,7 @@ detector.setDocumentSource('http://www.example.com')
 
 ```
 ## How to cusomize rules for the detector
-Using the high order functions inside `lib/rules.js`.
+Using the high order functions defined in [lib/rules.js](https://github.com/Rakasha/seo_defect/blob/master/lib/rules.js).
 
 For exmaple, calling
 
@@ -74,7 +75,10 @@ Generates a rule which checks if the number of `<strong>` tags is less than 2
 (TBD)
 
 
-
+## Test
+```bash
+npm test
+```
 
 
 ```
